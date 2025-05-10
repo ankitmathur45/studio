@@ -1,25 +1,23 @@
-
 "use client";
 import Link from 'next/link';
 import { APP_NAME } from '@/lib/constants';
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
-import { useSidebar } from "@/components/ui/sidebar";
+// import { Button } from "@/components/ui/button"; // Removed if Button not used
+// import { Menu } from "lucide-react"; // Removed
+// import { useSidebar } from "@/components/ui/sidebar"; // Removed
 
 const Header = () => {
-  const { toggleSidebar, isMobile } = useSidebar();
+  // const { toggleSidebar, isMobile } = useSidebar(); // Removed
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        {isMobile && (
+        {/* {isMobile && ( // Removed sidebar toggle button
           <Button variant="ghost" size="icon" onClick={toggleSidebar} className="mr-2">
             <Menu className="h-6 w-6" />
             <span className="sr-only">Toggle Menu</span>
           </Button>
-        )}
+        )} */}
         <Link href="/" className="flex items-center space-x-2">
-          {/* Replace with an actual logo if available */}
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary">
             <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
             <path d="M2 17l10 5 10-5"></path>
