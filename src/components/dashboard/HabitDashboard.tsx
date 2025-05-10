@@ -1,31 +1,19 @@
-
 "use client";
 
 import React, { useState, useMemo } from 'react';
+import type { ChartConfig } from "@/components/ui/chart";
 import { useHabits } from '@/contexts/HabitContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import StatCard from './StatCard';
 import CompletionBarChart from './CompletionBarChart';
-import { calculatePeriodStats, aggregateDailyCountsToWeekly, aggregateDailyCountsToMonthly, type PeriodStats, type HabitCompletionRate } from '@/lib/statsCalculators';
+import { calculatePeriodStats, type PeriodStats } from '@/lib/statsCalculators';
 import { 
   getWeekDates, getMonthDates, getQuarterDates, getYearDates, 
-  formatDateISO, formatDateReadable, 
+  formatDateReadable, 
   getWeekDateRange, getMonthDateRange, getQuarterDateRange, getYearDateRange
 } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, CalendarDays, TrendingUp, CheckCircle, ListChecks, Target } from 'lucide-react';
-import type { ChartConfig } from "@/components/ui/chart";
-import LucideIcon from '@/components/icons/LucideIcon';
-import { ScrollArea } from '@/components/ui/scroll-area';
-
-const chartConfigBase = {
-  completions: {
-    label: "Successful Days",
-    color: "hsl(var(--chart-1))",
-  },
-} satisfies ChartConfig;
-
+import { ChevronLeft, ChevronRight, ListChecks } from 'lucide-react';
 
 const HabitDashboard: React.FC = () => {
   const { habits, logs, isLoading: isHabitContextLoading } = useHabits();
@@ -61,35 +49,55 @@ const HabitDashboard: React.FC = () => {
   const quarterlyDates = useMemo(() => getQuarterDates(currentDateFocus), [currentDateFocus]);
   const annualDates = useMemo(() => getYearDates(currentDateFocus), [currentDateFocus]);
 
-  const weeklyStats = useMemo(() => calculatePeriodStats(habits, logs, weeklyDates, "This Week", (d) => formatDateReadable(d, 'EEE')), [habits, logs, weeklyDates]);
-  const monthlyStats = useMemo(() => calculatePeriodStats(habits, logs, monthlyDates, "This Month", (d) => formatDateReadable(d, 'd')), [habits, logs, monthlyDates]);
+  const weeklyStats = useMemo(() => calculatePeriodStats(habits, logs, weeklyDates, "This Week"), [habits, logs, weeklyDates]);
+  const monthlyStats = useMemo(() => calculatePeriodStats(habits, logs, monthlyDates, "This Month"), [habits, logs, monthlyDates]);
   const quarterlyStats = useMemo(() => calculatePeriodStats(habits, logs, quarterlyDates, "This Quarter"), [habits, logs, quarterlyDates]);
   const annualStats = useMemo(() => calculatePeriodStats(habits, logs, annualDates, "This Year"), [habits, logs, annualDates]);
 
   const isLoading = isHabitContextLoading;
 
-  const renderPeriodStats = (stats: PeriodStats, periodType: "weekly" | "monthly" | "quarterly" | "annually") => {
-    let chartData = stats.dailyActivityCounts;
-    let chartTitle = "Daily Successes";
-    let chartDescription = `Number of habits successfully completed/avoided each day for ${stats.periodLabel.toLowerCase()}.`;
+  const habitPerformanceChartConfig = useMemo(() => {
+    // This config is primarily for the 'count' dataKey, which represents the completion rate.
+    // Individual bar colors are handled by the 'fill' property in the data itself.
+    return {
+      count: { 
+        label: "Completion", // Used in tooltip if formatter doesn't override
+      }
+    } satisfies ChartConfig;
+  }, []);
 
-    if (periodType === "monthly" && stats.dailyActivityCounts) {
-        chartData = aggregateDailyCountsToWeekly(stats.dailyActivityCounts, monthlyDates[0]);
-        chartTitle = "Weekly Success Aggregates";
-        chartDescription = `Aggregated successful habit days per week for ${stats.periodLabel.toLowerCase()}.`;
-    } else if ((periodType === "quarterly" || periodType === "annually") && stats.dailyActivityCounts) {
-        chartData = aggregateDailyCountsToMonthly(stats.dailyActivityCounts, periodType === "quarterly" ? quarterlyDates[0] : annualDates[0]);
-        chartTitle = "Monthly Success Aggregates";
-        chartDescription = `Aggregated successful habit days per month for ${stats.periodLabel.toLowerCase()}.`;
-    }
+  const habitPerformanceTooltipFormatter = (value: number, nameKey: string, item: any, index: number, payloadEntry: any, config: ChartConfig) => {
+    // payloadEntry is the data object for the bar: { dateLabel (habit name), count (rate), fill (color), successfulDays, totalDaysInPeriod }
+    const seriesConfig = config[nameKey as keyof typeof config]; // config for "count" series
     
+    return (
+      <div className="w-full text-sm p-1">
+        <div className="font-semibold mb-1">{payloadEntry.dateLabel}</div> {/* Habit Name */}
+        <div className="flex items-center justify-between mb-0.5">
+          <span className="text-muted-foreground">{seriesConfig?.label || 'Rate'}:</span>
+          <span className="font-bold">{value}%</span>
+        </div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">Progress:</span>
+          <span className="font-bold">{payloadEntry.successfulDays} / {payloadEntry.totalDaysInPeriod} days</span>
+        </div>
+      </div>
+    );
+  };
+
+
+  const renderPeriodStats = (stats: PeriodStats) => {
     if (isLoading) {
       return (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
-          {[...Array(4)].map((_, i) => <StatCard key={i} title="" value="" isLoading={true} />)}
-          <div className="col-span-1 sm:col-span-2">
-            <CompletionBarChart data={[]} title="" description="" chartConfig={chartConfigBase} isLoading={true} />
-          </div>
+        <div className="space-y-4">
+           <CompletionBarChart 
+            data={[]} 
+            title="" 
+            description="" 
+            chartConfig={{}} 
+            xAxisDataKey="name"
+            yAxisDataKey="rate"
+            isLoading={true} />
         </div>
       );
     }
@@ -102,14 +110,14 @@ const HabitDashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Add some habits via "Manage Habits" in the sidebar to see your statistics.
+              Add some habits via "Manage Habits" to see your statistics.
             </p>
           </CardContent>
         </Card>
       );
     }
     
-    if (stats.totalPossibleHabitDays === 0 && habits.length > 0) {
+    if (stats.totalPossibleHabitDays === 0 && habits.length > 0 && stats.habitCompletionRates.length === 0) {
          return (
             <Card className="shadow-lg w-full mt-4">
             <CardHeader>
@@ -124,54 +132,39 @@ const HabitDashboard: React.FC = () => {
         );
     }
 
+    const habitBreakdownChartData = stats.habitCompletionRates.map(hr => ({
+      dateLabel: hr.name, // X-axis: Habit name
+      count: parseFloat(hr.rate.toFixed(1)), // Y-axis: Completion rate
+      fill: hr.color, // Bar color
+      successfulDays: hr.successfulDays,
+      totalDaysInPeriod: hr.totalDaysInPeriod,
+    }));
 
     return (
-      <div className="space-y-4"> {/* Reduced space-y from 6 to 4 */}
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2"> {/* Updated grid for StatCards */}
-          <StatCard title="Overall Completion" value={`${stats.overallCompletionRate.toFixed(1)}%`} description={stats.periodLabel} icon={TrendingUp} isLoading={isLoading}/>
-          <StatCard title="Habits Tracked" value={stats.totalHabitsTracked} description="Active habits this period" icon={Target} isLoading={isLoading} />
-          <StatCard title="Successful Days" value={stats.totalSuccessfulHabitDays} description="Total successful habit days" icon={CheckCircle} isLoading={isLoading}/>
-          <StatCard title="Possible Days" value={stats.totalPossibleHabitDays} description="Total trackable habit days" icon={CalendarDays} isLoading={isLoading}/>
-        </div>
-
-        {chartData && chartData.length > 0 && (
+      <div className="space-y-4">
+        {habitBreakdownChartData.length > 0 ? (
           <CompletionBarChart
-            data={chartData}
-            title={chartTitle}
-            description={chartDescription}
-            chartConfig={chartConfigBase}
+            data={habitBreakdownChartData}
+            title="Habit Performance"
+            description={`Completion rates for each habit ${stats.periodLabel.toLowerCase()}.`}
+            chartConfig={habitPerformanceChartConfig}
+            xAxisDataKey="dateLabel"
+            yAxisDataKey="count"
+            tooltipValueFormatter={habitPerformanceTooltipFormatter}
+            yAxisTickFormatter={(value) => `${value}%`}
             isLoading={isLoading}
           />
-        )}
-        
-        {stats.habitCompletionRates.length > 0 && (
-            <Card className="shadow-md w-full">
-                <CardHeader>
-                    <CardTitle className="flex items-center"><ListChecks className="mr-2 h-5 w-5 text-primary"/>Habit Breakdown</CardTitle>
-                    <CardDescription>Completion rates for each habit {stats.periodLabel.toLowerCase()}.</CardDescription>
+        ) : (
+             <Card className="shadow-lg w-full mt-4">
+                <CardHeader className="items-center">
+                    <ListChecks className="h-10 w-10 text-primary mb-2" />
+                    <CardTitle>Habit Performance</CardTitle>
+                    <CardDescription>No habit data to display for this period.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <ScrollArea className="h-[240px]"> {/* Reduced height from 300px */}
-                        <ul className="space-y-3 pr-3">
-                            {stats.habitCompletionRates.map(hr => (
-                                <li key={hr.habitId} className="flex items-center justify-between p-3 border rounded-md bg-card hover:bg-muted/50">
-                                    <div className="flex items-center space-x-3">
-                                        <div
-                                        className="p-1.5 rounded-md flex items-center justify-center w-7 h-7"
-                                        style={{ backgroundColor: hr.color }}
-                                        >
-                                        <LucideIcon name={hr.symbol} size={16} className="text-white" />
-                                        </div>
-                                        <span className="font-medium text-sm text-foreground">{hr.name}</span>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="font-semibold text-sm text-primary">{hr.rate.toFixed(1)}%</span>
-                                        <p className="text-xs text-muted-foreground">{hr.successfulDays}/{hr.totalDaysInPeriod} days</p>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </ScrollArea>
+                    <p className="text-muted-foreground text-center">
+                    Track your habits to see their performance breakdown here.
+                    </p>
                 </CardContent>
             </Card>
         )}
@@ -196,9 +189,8 @@ const HabitDashboard: React.FC = () => {
     return '';
   };
 
-
   return (
-    <div className="space-y-4"> {/* Reduced space-y from 6 to 4 */}
+    <div className="space-y-4">
         <div className="flex items-center justify-between">
             <Button variant="outline" size="icon" onClick={handlePrevPeriod} aria-label={`Previous ${activeTab.slice(0,-2)}`}>
               <ChevronLeft className="h-4 w-4" />
@@ -212,23 +204,23 @@ const HabitDashboard: React.FC = () => {
         </div>
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-4"> {/* Reduced mb-6 to mb-4 */}
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-4">
           <TabsTrigger value="weekly">Weekly</TabsTrigger>
           <TabsTrigger value="monthly">Monthly</TabsTrigger>
           <TabsTrigger value="quarterly">Quarterly</TabsTrigger>
           <TabsTrigger value="annually">Annually</TabsTrigger>
         </TabsList>
         <TabsContent value="weekly">
-          {renderPeriodStats(weeklyStats, "weekly")}
+          {renderPeriodStats(weeklyStats)}
         </TabsContent>
         <TabsContent value="monthly">
-          {renderPeriodStats(monthlyStats, "monthly")}
+          {renderPeriodStats(monthlyStats)}
         </TabsContent>
         <TabsContent value="quarterly">
-          {renderPeriodStats(quarterlyStats, "quarterly")}
+          {renderPeriodStats(quarterlyStats)}
         </TabsContent>
         <TabsContent value="annually">
-          {renderPeriodStats(annualStats, "annually")}
+          {renderPeriodStats(annualStats)}
         </TabsContent>
       </Tabs>
     </div>
