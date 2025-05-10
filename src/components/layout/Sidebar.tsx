@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState } from 'react';
-import { Home, LayoutDashboard, Lightbulb, Settings, Zap } from 'lucide-react';
+import { Home, LayoutDashboard, Settings } from 'lucide-react'; // Removed Lightbulb
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { APP_NAME } from '@/lib/constants';
@@ -23,7 +23,7 @@ import {
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/insights', label: 'Insights', icon: Lightbulb },
+  // Removed: { href: '/insights', label: 'Insights', icon: Lightbulb },
 ];
 
 const Sidebar = () => {
@@ -91,3 +91,4 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+
