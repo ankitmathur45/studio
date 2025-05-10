@@ -1,4 +1,3 @@
-
 "use client";
 import React from 'react';
 import Header from './Header';
@@ -13,11 +12,14 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <SidebarProvider defaultOpen={true}>
         <div className="flex min-h-screen flex-col bg-background">
           <Sidebar />
-          <SidebarInset>
+          <SidebarInset> {/* SidebarInset is a <main> tag and handles sidebar margins */}
             <Header />
-            <main className="flex-1 container py-6 px-4 sm:px-6 lg:px-8">
-              {children}
-            </main>
+            {/* Content area that grows and scrolls if necessary */}
+            <div className="flex-1 py-6"> {/* Vertical padding for content area, flex-1 to grow */}
+              <div className="container mx-auto h-full"> {/* Max-width container, h-full for children to fill */}
+                {children}
+              </div>
+            </div>
           </SidebarInset>
           <Toaster />
         </div>

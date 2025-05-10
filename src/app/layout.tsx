@@ -1,6 +1,6 @@
 import type {Metadata} from 'next';
 import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
+// import { GeistMono } from 'geist/font/mono'; // Removed due to module not found error
 import './globals.css';
 import AppLayout from '@/components/layout/AppLayout'; // Import AppLayout
 import { APP_NAME } from '@/lib/constants';
@@ -17,8 +17,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
-        {/* Conditionally render AppLayout or children directly if it's a special page like login/signup later */}
+      {/* Removed GeistMono.variable from className */}
+      <body className={`${GeistSans.variable} antialiased`}>
         <AppLayout>
           {children}
         </AppLayout>

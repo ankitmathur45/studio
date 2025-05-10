@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useMemo } from 'react';
 import { useHabits } from '@/contexts/HabitContext';
@@ -37,7 +36,7 @@ const WeeklyView: React.FC = () => {
   
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 w-full"> {/* Added w-full */}
         <div className="animate-pulse bg-muted h-12 w-full rounded-md"></div>
         {[...Array(3)].map((_, i) => (
           <div key={i} className="animate-pulse bg-muted h-20 w-full rounded-md"></div>
@@ -48,7 +47,7 @@ const WeeklyView: React.FC = () => {
 
   if (habits.length === 0) {
     return (
-      <Card className="shadow-lg">
+      <Card className="shadow-lg w-full"> {/* Added w-full */}
         <CardHeader>
           <CardTitle>Welcome to {process.env.NEXT_PUBLIC_APP_NAME || "Habitual"}!</CardTitle>
         </CardHeader>
@@ -64,7 +63,7 @@ const WeeklyView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-lg">
+      <Card className="shadow-lg w-full"> {/* Added w-full */}
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <Button variant="outline" size="icon" onClick={handlePrevWeek} aria-label="Previous week">
@@ -139,4 +138,3 @@ const WeeklyView: React.FC = () => {
 };
 
 export default WeeklyView;
-

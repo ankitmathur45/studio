@@ -1,11 +1,10 @@
-
 "use client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3 } from "lucide-react";
 
 const StatsPlaceholder = () => {
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-lg w-full"> {/* Added w-full */}
       <CardHeader>
         <CardTitle className="flex items-center">
           <BarChart3 className="mr-2 h-6 w-6 text-primary" />
