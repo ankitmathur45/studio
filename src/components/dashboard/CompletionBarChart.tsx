@@ -43,7 +43,7 @@ const CompletionBarChart: React.FC<CompletionBarChartProps> = ({
           <Skeleton className="h-4 w-4/5" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[300px] w-full" />
+          <Skeleton className="h-[200px] w-full" /> {/* Adjusted skeleton height */}
         </CardContent>
       </Card>
     );
@@ -58,7 +58,7 @@ const CompletionBarChart: React.FC<CompletionBarChartProps> = ({
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-center min-h-[300px]">
+        <CardContent className="flex items-center justify-center min-h-[200px]"> {/* Adjusted message height */}
           <p className="text-muted-foreground">{noDataMessage}</p>
         </CardContent>
       </Card>
@@ -72,7 +72,7 @@ const CompletionBarChart: React.FC<CompletionBarChartProps> = ({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+        <ChartContainer config={chartConfig} className="min-h-[200px] w-full"> {/* Reduced min-h from 250px */}
           <BarChart accessibilityLayer data={data} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis

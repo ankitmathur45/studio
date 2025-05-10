@@ -85,9 +85,9 @@ const HabitDashboard: React.FC = () => {
     
     if (isLoading) {
       return (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
           {[...Array(4)].map((_, i) => <StatCard key={i} title="" value="" isLoading={true} />)}
-          <div className="md:col-span-2 lg:col-span-3 xl:col-span-4">
+          <div className="col-span-1 sm:col-span-2">
             <CompletionBarChart data={[]} title="" description="" chartConfig={chartConfigBase} isLoading={true} />
           </div>
         </div>
@@ -126,8 +126,8 @@ const HabitDashboard: React.FC = () => {
 
 
     return (
-      <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
+      <div className="space-y-4"> {/* Reduced space-y from 6 to 4 */}
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2"> {/* Updated grid for StatCards */}
           <StatCard title="Overall Completion" value={`${stats.overallCompletionRate.toFixed(1)}%`} description={stats.periodLabel} icon={TrendingUp} isLoading={isLoading}/>
           <StatCard title="Habits Tracked" value={stats.totalHabitsTracked} description="Active habits this period" icon={Target} isLoading={isLoading} />
           <StatCard title="Successful Days" value={stats.totalSuccessfulHabitDays} description="Total successful habit days" icon={CheckCircle} isLoading={isLoading}/>
@@ -151,7 +151,7 @@ const HabitDashboard: React.FC = () => {
                     <CardDescription>Completion rates for each habit {stats.periodLabel.toLowerCase()}.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <ScrollArea className="h-[300px]">
+                    <ScrollArea className="h-[240px]"> {/* Reduced height from 300px */}
                         <ul className="space-y-3 pr-3">
                             {stats.habitCompletionRates.map(hr => (
                                 <li key={hr.habitId} className="flex items-center justify-between p-3 border rounded-md bg-card hover:bg-muted/50">
@@ -198,7 +198,7 @@ const HabitDashboard: React.FC = () => {
 
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4"> {/* Reduced space-y from 6 to 4 */}
         <div className="flex items-center justify-between">
             <Button variant="outline" size="icon" onClick={handlePrevPeriod} aria-label={`Previous ${activeTab.slice(0,-2)}`}>
               <ChevronLeft className="h-4 w-4" />
@@ -212,7 +212,7 @@ const HabitDashboard: React.FC = () => {
         </div>
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-6">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-4"> {/* Reduced mb-6 to mb-4 */}
           <TabsTrigger value="weekly">Weekly</TabsTrigger>
           <TabsTrigger value="monthly">Monthly</TabsTrigger>
           <TabsTrigger value="quarterly">Quarterly</TabsTrigger>
