@@ -79,8 +79,8 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const deleteHabit = useCallback((habitId: string) => {
-    setHabits(prev => prev.filter(h => h.id !== habitId));
-    setLogs(prev => prev.filter(log => log.habitId !== habitId)); // Also remove associated logs
+    setHabits(prevHabits => prevHabits.filter(h => h.id !== habitId));
+    setLogs(prevLogs => prevLogs.filter(log => log.habitId !== habitId)); // Also remove all associated logs
   }, []);
   
   const getHabitById = useCallback((habitId: string) => {
@@ -121,15 +121,26 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
   const deleteActivityEntry = useCallback((habitId: string, date: string, entryId: string) => {
     setLogs(prevLogs => {
       const logId = `${habitId}-${date}`;
-      return prevLogs.map(log => {
-        if (log.id === logId) {
+      // First, update the activities array for the targeted log
+      const logsWithActivityRemoved = prevLogs.map(log => {
+        if (log.id === logId) { // Check if this is the log for the specified habit and date
           return {
             ...log,
             activities: log.activities.filter(activity => activity.id !== entryId),
           };
         }
         return log;
-      }).filter(log => log.activities.length > 0 || !log.id.startsWith(habitId)); // Remove log if no activities left, unless it was a negative habit day marked with 'x'
+      });
+
+      // Then, filter out any logs for THIS habit (habitId) that are now empty.
+      // This ensures that if the log for 'date' becomes empty, it's removed.
+      // It also cleans up any other pre-existing empty logs for this specific habit.
+      return logsWithActivityRemoved.filter(log => {
+        if (log.habitId === habitId && log.activities.length === 0) {
+          return false; // Remove this log if it's for the target habit and now has no activities
+        }
+        return true; // Keep all other logs
+      });
     });
   }, []);
   
@@ -195,3 +206,4 @@ export const useHabits = () => {
   }
   return context;
 };
+
